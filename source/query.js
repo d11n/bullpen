@@ -39,7 +39,6 @@
     /// query_object.to_json()
     /// query_object.translate_to_uri_query(transform_dict)
     /// ```
-
     Object.assign(Query.prototype, get_default_query_params());
     Object.defineProperties(Query.prototype, {
         to_uri_query: { value: convert_this_query_to_uri_query },
