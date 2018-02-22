@@ -1,0 +1,58 @@
+{
+    "name": "bullpen",
+    "version": "0.0.1",
+    "description": "JavaScript store interface for simplifying data flow and state management, works well with Redux and Mobx",
+    "author": "Derek Dunagan (https://github.com/rhombal)",
+    "license": "MIT",
+    "keywords": [
+        "store",
+        "state",
+        "state management",
+        "data",
+        "data store",
+        "data flow",
+        "redux",
+        "mobx"
+    ],
+    "main": "target/node/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rhombal/bullpen.git"
+    },
+    "homepage": "https://github.com/rhombal/bullpen#readme",
+    "bugs": {
+        "url": "https://github.com/rhombal/bullpen/issues"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "babelify": "^8.0.0",
+        "browserify": "^16.1.0",
+        "chokidar-cli": "^1.2.0",
+        "docco": "^0.8.0",
+        "eslint": "^4.18.0",
+        "mkdirp": "^0.5.1",
+        "mocha": "^5.0.1",
+        "np": "^2.20.1",
+        "rimraf": "^2.6.2"
+    },
+    "scripts": {
+        "test": "eslint ./source && mocha ./source/**/*.test.js",
+        "prestart": "rimraf ./target/node; mkdirp ./target/node; npm run --silent build",
+        "start": "chokidar './source/**/*.js' --command 'npm test --silent && (npm run --silent _build-web & (path={path} && babel $path --out-file ${path/source\\//target/node/}))'",
+        "_prebuild": "npm install --silent && npm test --silent",
+        "prebuild-web": "npm run --silent _prebuild",
+        "prebuild-node": "npm run --silent _prebuild",
+        "prebuild-docs": "npm test --silent",
+        "build": "npm run --silent build-web",
+        "_build-web": "rimraf ./target/web; mkdirp ./target/web; browserify --debug --transform [ babelify --presets [ env ] ] ./source/index.js --require babel-register > ./target/web/index.js",
+        "build-web": "npm run --silent _build-web",
+        "build-node": "rimraf ./target/node; babel ./source --out-dir ./target/node",
+        "build-docs": "rimraf ./target/docs; mkdirp ./target/docs ./.tmp/docco; echo '{\".js\":{\"name\":\"javascript\",\"symbol\":\"///\"}}' > ./.tmp/docco/languages.json; cd source; docco index.js bullpen.js collection.js query.js util.js view.js --languages ../.tmp/docco/languages.json --output ../target/docs; cd ..; echo '*{text-transform:none!important}.annotation h1,.annotation h2,.annotation h3,.annotation h4,.annotation h5,.annotation h6{margin-top:8px!important}' >> ./target/docs/docco.css",
+        "postbuild-docs": "rimraf ./.tmp/docco",
+        "publish-npm": "git push origin && np",
+        "rinse": "rimraf ./target ./.tmp ./tmp ./**/.tmp ./**/tmp ./npm-debug.log* ./**/npm-debug.log*",
+        "scrub": "npm run --silent rinse; rimraf ./node_modules ./target"
+    }
+}
