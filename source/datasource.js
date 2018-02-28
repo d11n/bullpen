@@ -111,7 +111,6 @@
             return resolve_promise(response);
         }
         function process_axios_rejection(axios_response) {
-            debugger;
             return process_axios_resolution(axios_response.response);
         }
         function set_promise_resolver(promise_resolver) {
