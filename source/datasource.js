@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-params
-(function main(axios) {
+(function main(axios, Uri_query) {
     assign_static_members();
     assign_instance_members();
     return module.exports = Object.freeze(Datasource);
@@ -146,7 +146,7 @@
         for (let i = 0, n = path_segments.length - 1; i <= n; i++) {
             path_segments[i] && (url += `/${ trim_slashes(path_segments[i]) }`);
         }
-        const url_query = url_encode_query(query);
+        const url_query = new Uri_query(query);
         return `${ url || '/' }${ url_query }`;
     }
     function compose_url_from_instance(params) {
@@ -163,54 +163,7 @@
     function trim_slashes(value) {
         return value.replace(/(?:^\/+|\/+$)/g, '');
     }
-
-    function url_encode_query(raw_query) {
-        const query_keys = Object.keys(raw_query);
-        const query_pairs = [];
-        for (let qi = 0, qn = query_keys.length - 1; qi <= qn; qi++) {
-            const raw_key = query_keys[qi];
-            const raw_value = raw_query[raw_key];
-            if (undefined === raw_value) {
-                // do nothing
-            } else if (null === raw_value) {
-                query_pairs.push(encodeURIComponent(raw_key));
-            } else if (Array.isArray(raw_value)) {
-                append_queryized_array(raw_key, raw_value);
-            } else if ('object' === typeof raw_value) {
-                append_queryized_object(raw_key, raw_value);
-            } else {
-                const key = encodeURIComponent(raw_key);
-                const value = encodeURIComponent(raw_value);
-                query_pairs.push(`${ key }=${ value }`);
-            }
-        }
-        return query_pairs.length > 0 ? `?${ query_pairs.join('&') }` : '';
-
-        // -----------
-
-        function append_queryized_array(raw_key, raw_value) {
-            const key = `${ encodeURIComponent(raw_key) }[]`;
-            for (let ai = 0, an = raw_value.length - 1; ai <= an; ai++) {
-                const value = encodeURIComponent(raw_value[ai]);
-                query_pairs.push(`${ key }=${ value }`);
-            }
-            return true;
-        }
-
-        function append_queryized_object(raw_key, raw_value) {
-            const subkeys = Object.keys(raw_value);
-            for (let oi = 0, on = subkeys.length - 1; oi <= on; oi++) {
-                const subkey = subkeys[oi];
-                // eslint-disable-next-line prefer-template
-                const key = encodeURIComponent(raw_key)
-                    + `[${ encodeURIComponent(subkey) }]`
-                    ; // eslint-disable-line indent
-                const value = encodeURIComponent(raw_value[subkey]);
-                query_pairs.push(`${ key }=${ value }`);
-            }
-            return true;
-        }
-    }
 }(
     require('axios'),
+    require('uri-query'),
 ));
