@@ -33,7 +33,7 @@
         "babel-preset-react": "^6.24.1",
         "chokidar-cli": "^1.2.0",
         "docco": "^0.8.0",
-        "eslint": "^4.18.0",
+        "eslint": "^4.18.1",
         "mkdirp": "^0.5.1",
         "mocha": "^5.0.1",
         "np": "^2.20.1",
