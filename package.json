@@ -25,7 +25,7 @@
     },
     "dependencies": {
         "axios": "^0.18.0",
-        "uri-query": "0.0.7"
+        "uri-query": "^0.1.0"
     },
     "devDependencies": {
         "babel-cli": "^6.26.0",
