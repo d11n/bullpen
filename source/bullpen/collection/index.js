@@ -1,26 +1,34 @@
 // eslint-disable-next-line max-params
 (function main(Uri_query, UTIL, Datasource, Thin_promise, Query_result) {
+    class Collection {
+        constructor(...args) {
+            return construct_collection.call(this, ...args);
+        }
+    }
     Object.assign(Collection, {
         ALL_ITEMS: new String(''), // eslint-disable-line no-new-wrappers
         Query: Uri_query,
         Query_result,
         }); // eslint-disable-line indent
-    return module.exports = Collection;
+    return module.exports = Object.freeze(Collection);
 
     // -----------
 
-    function Collection(raw_params) {
+    function construct_collection(raw_params) {
         const this_collection = this;
         const params = validate_params(raw_params);
 
         const { datasource, namespace, operations } = params;
+        const { store_creator, default_operation } = params;
         const op_tree = { ...operations };
-        const store = Object.defineProperties({}, {
-            is_item_dict_fully_hydrated: { value: false, writable: true },
-            item_dict: { value: {} },
-            query_result_dict: { value: {} },
-            }); // eslint-disable-line indent
-        Object.seal(store);
+        const store_struct = {
+            is_item_list_fully_hydrated: false,
+            item_list: [],
+            query_result_dict: {},
+            }; // eslint-disable-line indent
+        const store = Object.seal(
+            store_creator ? store_creator(store_struct) : store_struct,
+            ); // eslint-disable-line indent
 
         const { preparer, item_preparer, query_result_preparer } = params;
         const real_item_preparer = item_preparer || preparer || noprep;
@@ -43,6 +51,7 @@
                 op_dict,
                 item_preparer: real_item_preparer,
                 query_result_preparer: result_preparer,
+                default_operation: default_operation || perform_default_op,
                 }; // eslint-disable-line indent
             this_collection.get = create_getter(fetcher_params);
             this_collection.stream = create_streamer(fetcher_params);
@@ -133,9 +142,10 @@
             operation_params.params = operation_params.payload;
             delete operation_params.payload;
         }
+        const { default_operation } = params;
         const operate = op_dict[operation]
             ? op_dict[operation]
-            : perform_default_operation
+            : default_operation
             ; // eslint-disable-line indent
         return operate(operation_params, store, make_request);
 
@@ -197,10 +207,10 @@
 
     // -----------
 
-    function perform_default_operation(operation, store, make_request) {
+    function perform_default_op(operation, store, make_request) {
         const next_thing = new Thin_promise;
         if (operation.id) {
-            const item = store.item_dict[operation.id];
+            const item = store.item_list.find((itm) => operation.id === itm.id);
             if (item) {
                 next_thing.do(item);
             } else {
@@ -208,8 +218,8 @@
             }
         } else if (operation.query) {
             make_request().then(update_query_result);
-        } else if (store.is_item_dict_fully_hydrated) {
-            next_thing.do(Object.values(store.item_dict));
+        } else if (store.is_item_list_fully_hydrated) {
+            next_thing.do(store.item_list);
         } else {
             make_request().then(update_items);
         }
@@ -218,17 +228,25 @@
         // -----------
 
         function update_item(item) {
-            store.item_dict[item.id] = item;
+            _update_item(item);
             return next_thing.do(item);
+        }
+        function _update_item(item) {
+            const i = store.item_list.findIndex((itm) => item.id === itm.id);
+            -1 === i
+                ? store.item_list.push(item)
+                : (store.item_list[i] = item) // eslint-disable-line
+                ; // eslint-disable-line indent
+            return item;
         }
 
         function update_items(items) {
             for (let i = 0, n = items.length - 1; i <= n; i++) {
                 const item = items[i];
-                store.item_dict[item.id] = item;
+                _update_item(item);
             }
-            store.is_item_dict_fully_hydrated = true;
-            return next_thing.do(Object.values(store.item_dict));
+            store.is_item_list_fully_hydrated = true;
+            return next_thing.do(store.item_list);
         }
 
         function update_query_result(query_result) {
