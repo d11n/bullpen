@@ -59,9 +59,9 @@
     // -----------
 
     function make_request(params, url_composer = compose_url) {
-        const prepare_response_data = params.response_data_preparer;
-        const request = Object.assign({}, params);
-        delete request.response_data_preparer;
+        const prepare_data = params.preparer;
+        const request_metadata = Object.assign({}, params);
+        delete request_metadata.preparer;
 
         const { headers, http_verb, payload } = params;
         const settings = {
@@ -89,8 +89,8 @@
                 headers: axios_response.headers,
                 data: axios_response.data,
                 }; // eslint-disable-line indent
-            if (prepare_response_data) {
-                response.data = prepare_response_data(request, response);
+            if (prepare_data) {
+                response.data = prepare_data(request_metadata, response);
             }
             return next_thing.do(response);
         }

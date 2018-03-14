@@ -10,14 +10,14 @@
 
     function make_request_from_instance(params) {
         const this_datasource = this;
-        const { response_data_preparer } = this_datasource;
+        const { preparer } = this_datasource;
         const headers = Object.assign(
             {},
             this_datasource.headers,
             params.headers,
             ); // eslint-disable-line indent
         return this_datasource.constructor.make_request(
-            Object.assign({}, params, { headers, response_data_preparer }),
+            Object.assign({}, params, { headers, preparer }),
             compose_url_from_instance.bind(this_datasource),
             ); // eslint-disable-line indent
     }
