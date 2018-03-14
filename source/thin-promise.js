@@ -15,16 +15,18 @@
         function set_next_func(next_func) {
             if ('function' !== typeof next_func) {
                 throw new TypeError('then() must be passed a single function');
+            } else if (do_next_func === this.do) {
+                throw new Error('then() is already set on this "thin" promise');
             }
             this.do = set_next_args === this.do && next_args
                 ? next_func(...next_args)
-                : recurse_next_func
+                : do_next_func
                 ; // eslint-disable-line indent
             return this;
 
             // -----------
 
-            function recurse_next_func(...args) {
+            function do_next_func(...args) {
                 this.do = next_func(...args);
                 return this;
             }

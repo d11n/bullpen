@@ -1,15 +1,15 @@
 // eslint-disable-next-line max-params
 (function main() {
-    Result.has_id = has_id;
-    Object.assign(Result.prototype, { has_id: instance_has_id });
-    return module.exports = Result;
+    Query_result.has_id = has_id;
+    Query_result.prototype.has_id = instance_has_id;
+    return module.exports = Query_result;
 
     // -----------
 
-    function Result(raw_params) {
-        const this_batch = this;
-        Object.assign(this_batch, validate_constructor_params(raw_params));
-        return this_batch;
+    function Query_result(raw_params) {
+        const this_result = this;
+        Object.assign(this_result, validate_constructor_params(raw_params));
+        return this_result;
     }
 
     function validate_constructor_params(raw_params) {
@@ -26,24 +26,22 @@
             ; // eslint-disable-line indent
         params.items = raw_params.items;
 
-        !raw_params.ids && throw_error('ids is required');
-        !Array.isArray(raw_params.ids)
-            && throw_error('ids must be an array')
-            ; // eslint-disable-line indent
-        params.ids = raw_params.ids;
-
         !raw_params.refresh_url && throw_error('refresh_url is required');
         'string' !== typeof raw_params.refresh_url
             && throw_error('refresh_url must be a string')
             ; // eslint-disable-line indent
         params.refresh_url = raw_params.refresh_url;
 
-        raw_params.pagination && (params.pagination = raw_params.pagination);
-        return params;
+        params.ids = raw_params.ids || params.items.map(get_id);
+        return { ...raw_params, ...params };
     }
 
-    function has_id(batch, id) {
-        return batch.ids.includes(id);
+    function get_id(item) {
+        return item.id;
+    }
+
+    function has_id(result, id) {
+        return result.ids.includes(id);
     }
     function instance_has_id(id) {
         return has_id(this, id);
@@ -52,6 +50,6 @@
     // -----------
 
     function throw_error(message) {
-        throw new Error(`BULLPEN.Collection.Query.Result: ${ message }`);
+        throw new Error(`BULLPEN.Collection.Query_result: ${ message }`);
     }
 }());
