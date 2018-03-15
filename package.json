@@ -2,7 +2,7 @@
     "name": "bullpen",
     "version": "0.0.8",
     "description": "JavaScript store interface for simplifying data flow and state management, works well with Redux and Mobx",
-    "author": "Derek Dunagan (https://github.com/rhombal)",
+    "author": "Derek Dunagan (https://github.com/d11n)",
     "license": "MIT",
     "keywords": [
         "store",
@@ -17,11 +17,11 @@
     "main": "target/npm/index.js",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rhombal/bullpen.git"
+        "url": "git+https://github.com/d11n/bullpen.git"
     },
-    "homepage": "https://github.com/rhombal/bullpen#readme",
+    "homepage": "https://github.com/d11n/bullpen#readme",
     "bugs": {
-        "url": "https://github.com/rhombal/bullpen/issues"
+        "url": "https://github.com/d11n/bullpen/issues"
     },
     "dependencies": {
         "axios": "^0.18.0",
