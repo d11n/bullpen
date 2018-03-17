@@ -11,7 +11,7 @@
 
     function construct_store(params) {
         const this_result = this;
-        const { operations, default_operation } = params;
+        const { store_creator, operations, default_operation } = params;
         const op_tree = { ...operations };
         const store_struct = {
             is_item_list_fully_hydrated: false,

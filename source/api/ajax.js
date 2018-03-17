@@ -2,7 +2,7 @@
 (function main(axios, Uri_query, Thin_promise, Api, API_UTIL) {
     class Ajax_api extends Api {
         constructor(...args) {
-            return construct_ajax_api.call(this, ...args);
+            return super() && construct_ajax_api.call(this, ...args);
         }
     }
     // Instance members
