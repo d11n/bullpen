@@ -1,10 +1,15 @@
 // eslint-disable-next-line max-params
 (function main() {
-    return module.exports = Thin_promise;
+    class Thin_promise {
+        constructor(...args) {
+            return construct_thin_promise.call(this, ...args);
+        }
+    }
+    return module.exports = Object.freeze(Thin_promise);
 
     // -----------
 
-    function Thin_promise() {
+    function construct_thin_promise() {
         let next_args;
         this.do = set_next_args;
         this.then = set_next_func;
