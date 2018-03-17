@@ -1,59 +1,35 @@
 // eslint-disable-next-line max-params
-(function main(axios, Uri_query, Thin_promise, DATASOURCE_UTIL) {
-    assign_static_members();
-    assign_instance_members();
-    return module.exports = Object.freeze(Datasource);
+(function main(axios, Uri_query, Thin_promise, Api, API_UTIL) {
+    class Ajax_api extends Api {
+        constructor(...args) {
+            return construct_ajax_api.call(this, ...args);
+        }
+    }
+    // Instance members
+    Object.freeze(Object.assign(Ajax_api.prototype, {
+        // Default params
+        headers: {},
+        http_verb: 'GET',
+        protocol: 'https',
+        domain: null,
+        port: null,
+        path_prefix: null,
+        query: {},
+        })); // eslint-disable-line
+    // Static members
+    Object.freeze(Object.assign(Ajax_api, { compose_url, make_request }));
+    return module.exports = Ajax_api;
 
     // -----------
 
-    function Datasource(params) {
-        const this_datasource = this;
-        Object.assign(this_datasource, validate_constructor_params(params));
-        return this_datasource;
-    }
-
-    function assign_static_members() {
-        return Object.assign(Datasource, {
-            compose_url,
-            make_request,
-            }); // eslint-disable-line indent
-    }
-
-    function assign_instance_members() {
-        return Object.assign(Datasource.prototype, {
-
-            // Default params
-            headers: {},
-            http_verb: 'GET',
-            protocol: 'https',
-            domain: null,
-            port: null,
-            path_prefix: null,
-            query: {},
-
-            // Methods
-            fetch: make_fetch_request,
-            do: make_do_request,
-            }); // eslint-disable-line
+    function construct_ajax_api(params) {
+        const this_api = this;
+        Object.assign(this_api, validate_constructor_params(params));
+        return this_api;
     }
 
     function validate_constructor_params(raw_params) {
         return raw_params || {};
-    }
-
-    // -----------
-
-    function make_fetch_request(params) {
-        return DATASOURCE_UTIL.make_request_from_instance.call(
-            this,
-            Object.assign({}, params, { http_verb: 'GET' }),
-            ); // eslint-disable-line indent
-    }
-    function make_do_request(params) {
-        return DATASOURCE_UTIL.make_request_from_instance.call(
-            this,
-            Object.assign({}, params, { http_verb: 'POST' }),
-            ); // eslint-disable-line indent
     }
 
     // -----------
@@ -110,7 +86,7 @@
         const path_segments = [ path_prefix, namespace, id, operation ];
         for (let i = 0, n = path_segments.length - 1; i <= n; i++) {
             if (path_segments[i]) {
-                url += `/${ DATASOURCE_UTIL.trim_slashes(path_segments[i]) }`;
+                url += `/${ API_UTIL.trim_slashes(path_segments[i]) }`;
             }
         }
         const url_query = new Uri_query(query);
@@ -120,5 +96,6 @@
     require('axios'),
     require('uri-query'),
     require('../thin-promise'),
+    require('./api'),
     require('./util'),
 ));
