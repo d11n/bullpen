@@ -1,16 +1,17 @@
 // eslint-disable-next-line max-params
-(function main(Uri_query, UTIL, Datasource, Thin_promise, Query_result) {
+(function main(Uri_query, Datasource, Thin_promise, Query_result, Store) {
     class Collection {
         constructor(...args) {
             return construct_collection.call(this, ...args);
         }
     }
-    Object.assign(Collection, {
+    Object.freeze(Object.assign(Collection, {
         ALL_ITEMS: new String(''), // eslint-disable-line no-new-wrappers
         Query: Uri_query,
         Query_result,
-        }); // eslint-disable-line indent
-    return module.exports = Object.freeze(Collection);
+        Store,
+        })); // eslint-disable-line indent
+    return module.exports = Collection;
 
     // -----------
 
@@ -80,6 +81,11 @@
     }
 
     function validate_params(raw_params) {
+        !(raw_params.store instanceof Store)
+            && throw_error(
+                'store must be an instance of BULLPEN.Collection.Store',
+                ) // eslint-disable-line indent
+            ; // eslint-disable-line indent
         return raw_params;
     }
 
@@ -273,10 +279,16 @@
     function noprep(value) {
         return value;
     }
+
+    // -----------
+
+    function throw_error(message) {
+        throw new Error(`BULLPEN.Collection: ${ message }`);
+    }
 }(
     require('uri-query'),
-    require('../../util'),
     require('../../datasource'),
     require('../../thin-promise'),
     require('./query-result'),
+    require('./store'),
 ));

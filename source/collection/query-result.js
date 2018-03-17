@@ -1,12 +1,16 @@
 // eslint-disable-next-line max-params
 (function main() {
+    class Query_result {
+        constructor(...args) {
+            return construct_query_result.call(this, ...args);
+        }
+    }
     Query_result.has_id = has_id;
-    Query_result.prototype.has_id = instance_has_id;
-    return module.exports = Query_result;
+    return module.exports = Object.freeze(Query_result);
 
     // -----------
 
-    function Query_result(raw_params) {
+    function construct_query_result(raw_params) {
         const this_result = this;
         Object.assign(this_result, validate_constructor_params(raw_params));
         return this_result;
@@ -42,9 +46,6 @@
 
     function has_id(result, id) {
         return result.ids.includes(id);
-    }
-    function instance_has_id(id) {
-        return has_id(this, id);
     }
 
     // -----------
