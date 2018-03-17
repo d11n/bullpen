@@ -1,10 +1,12 @@
 // eslint-disable-next-line max-params
-(function main(Datasource, Collection) {
+(function main(API, Collection) {
+    const { Mofo_api, Rest_api } = API;
     return module.exports = Object.freeze({
-        Datasource,
+        Mofo_api,
+        Rest_api,
         Collection,
         }); // eslint-disable-line indent
 }(
-    require('./datasource'),
-    require('./bullpen/collection'),
+    require('./api'),
+    require('./collection'),
 ));
