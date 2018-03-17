@@ -1,0 +1,19 @@
+Before 1.0
+----------
+- think thru stores that have multiple datasources
+- tree bullpen
+- view bullpen
+- publishers (e.g. pusher)
+- make operations hit api instead of store until publisher set
+- tests
+- code coverage
+- documentation
+- get it up-to-snuff
+    - travis
+    - coveralls
+    - codacy
+    - code climate
+    - snyk
+    - david
+- get all a's ^
+- live on sr,tf,1mo
