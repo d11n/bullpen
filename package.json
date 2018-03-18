@@ -1,6 +1,6 @@
 {
     "name": "bullpen",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "JavaScript store interface for simplifying data flow and state management, works well with Redux and Mobx",
     "author": "Derek Dunagan (https://github.com/d11n)",
     "license": "MIT",
