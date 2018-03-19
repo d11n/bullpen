@@ -18,12 +18,6 @@
 
     function validate_constructor_params(raw_params) {
         const params = {};
-        !raw_params.name && throw_error('name is required');
-        'string' !== typeof raw_params.name
-            && throw_error('name must be a string')
-            ; // eslint-disable-line indent
-        params.name = raw_params.name;
-
         !raw_params.items && throw_error('items is required');
         !Array.isArray(raw_params.items)
             && throw_error('items must be an array')

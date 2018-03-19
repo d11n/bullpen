@@ -1,17 +1,18 @@
 // eslint-disable-next-line max-params
 (function main(Ajax_api, API_UTIL) {
-    class Mofo_api extends Ajax_api {
+    // Fetch XOR Mutate
+    class Fxm_api extends Ajax_api {
         constructor(...args) {
             return super(...args);
         }
         fetch(params) {
             return make_request.call(this, params, 'GET');
         }
-        do(params) {
+        mutate(params) {
             return make_request.call(this, params, 'POST');
         }
     }
-    return module.exports = Object.freeze(Mofo_api);
+    return module.exports = Object.freeze(Fxm_api);
 
     // -----------
 

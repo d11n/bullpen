@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-params
-(function main(axios, Uri_query, Thin_promise, Api, API_UTIL) {
+(function main(axios, Uri_query, Api, API_UTIL) {
     class Ajax_api extends Api {
         constructor(...args) {
             return super() && construct_ajax_api.call(this, ...args);
@@ -15,6 +15,9 @@
         port: null,
         path_prefix: null,
         query: {},
+
+        // Abstract methods
+        fetch: () => throw_error('Children of Ajax_api must define fetch()'),
         })); // eslint-disable-line
     // Static members
     Object.freeze(Object.assign(Ajax_api, { compose_url, make_request }));
@@ -51,8 +54,8 @@
             .then(process_axios_response)
             .catch(process_axios_rejection)
             ; // eslint-disable-line indent
-        const next_thing = new Thin_promise;
-        return next_thing;
+        const promise = new Promise;
+        return promise;
 
         // -----------
 
@@ -68,10 +71,13 @@
             if (prepare_data) {
                 response.data = prepare_data(request_metadata, response);
             }
-            return next_thing.do(response);
+            return promise.resolve(response);
         }
         function process_axios_rejection(axios_rejection) {
-            return process_axios_response(axios_rejection.response);
+            return axios_rejection.response
+                ? process_axios_response(axios_rejection.response)
+                : throw_error(axios_rejection)
+                ; // eslint-disable-line indent
         }
     }
 
@@ -92,10 +98,18 @@
         const url_query = new Uri_query(query);
         return `${ url || '/' }${ url_query }`;
     }
+
+    // -----------
+
+    function throw_error(message) {
+        throw message instanceof Error
+            ? message
+            : new Error(`BULLPEN.Api: ${ message }`)
+            ; // eslint-disable-line indent
+    }
 }(
     require('axios'),
     require('uri-query'),
-    require('../thin-promise'),
     require('./api'),
     require('./util'),
 ));
