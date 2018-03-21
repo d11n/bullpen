@@ -5,6 +5,7 @@
             return construct_store.call(this, ...args);
         }
     }
+    const { ALL_ITEMS, NOOP, validate_op_args } = COLLECTION_UTIL;
     // Functional instance members (for overridability in child classes)
     Object.assign(Store.prototype, {
         initialize: (value) => value,
@@ -52,6 +53,10 @@
                 get: () => store_struct.is_item_list_fully_hydrated,
                 enumerable: true,
                 }, // eslint-disable-line indent
+            has: {
+                value: (id) => store_struct_has(store_struct, id),
+                enumerable: true,
+                }, // eslint-disable-line indent
             }); // eslint-disable-line indent
         Object.freeze(this_store);
         return this_store;
@@ -60,15 +65,17 @@
     }
 
     function validate_params(raw_params) {
-        return raw_params;
+        return raw_params || {};
     }
 
     // -----------
 
-
     function create_method(params) {
         const { store, method, store_struct, op_dict, default_fetch } = params;
-        return function perform_operation(arg0, op, op_params) {
+        return function perform_operation(raw_arg0, raw_op, raw_op_params) {
+            const [ arg0, op, op_params ]
+                = validate_op_args(raw_arg0, raw_op, raw_op_params)
+                ; // eslint-disable-line indent
             const perform_op = op
                 ? op_dict[op]
                 : 'fetch' === method
@@ -83,7 +90,7 @@
                     params: op_params,
                     }); // eslint-disable-line indent
             }
-            return COLLECTION_UTIL.NOOP;
+            return NOOP;
         };
     }
 
@@ -106,7 +113,7 @@
 
     function perform_default_fetch(store_struct, arg0, datasource_payload) {
         return arg0 instanceof Query ? fetch_query()
-            : COLLECTION_UTIL.ALL_ITEMS === arg0 ? fetch_all()
+            : ALL_ITEMS === arg0 ? fetch_all()
             : fetch_one()
             ; // eslint-disable-line indent
 
@@ -148,13 +155,11 @@
             let item = datasource_payload;
             if (item) {
                 if (arg0 !== item.id) {
-                    throw_error('fetched id does not match id from datasource');
+                    throw_error('id does not match id fetched from datasource');
                 }
                 item = update_item(item);
             } else {
-                item = store_struct.item_list.find(
-                    (item_in_list) => arg0 === item_in_list.id,
-                    ); // eslint-disable-line indent;
+                item = store_struct_has(store_struct, arg0);
             }
             return item;
         }
@@ -167,17 +172,22 @@
                 ); // eslint-disable-line indent
             -1 === i
                 ? store_struct.item_list.push(item_to_upsert)
-                // eslint-disable-next-line no-extra-parens
-                : (store_struct.item_list[i] = item_to_upsert)
+                : store_struct.item_list[i] = item_to_upsert
                 ; // eslint-disable-line indent
             return item_to_upsert;
         }
     }
 
+    function store_struct_has(store_struct, id) {
+        return store_struct.item_list
+            .find((item_in_list) => id === item_in_list.id)
+            ; // eslint-disable-line indent
+    }
+
     // -----------
 
     function throw_error(message) {
-        throw new Error(`BULLPEN.Collection.Store: ${ message }`);
+        throw new Error(`BULLPEN.Collection: ${ message }`);
     }
 }(
     require('./query'),

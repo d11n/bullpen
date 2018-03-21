@@ -5,6 +5,7 @@
             return construct_datasource.call(this, ...args);
         }
     }
+    const { ALL_ITEMS, NOOP, validate_op_args } = COLLECTION_UTIL;
     return module.exports = Datasource;
 
     // -----------
@@ -13,6 +14,7 @@
         const this_datasource = this;
         const params = validate_params(raw_params);
         const { api, namespace, operations } = params;
+        const op_tree = Object.assign({ fetch: {} }, operations);
         const { preparer, item_preparer, query_result_preparer } = params;
         const real_item_preparer = item_preparer || preparer || noprep;
         const result_preparer = query_result_preparer || preparer || noprep;
@@ -22,14 +24,14 @@
         // -----------
 
         function assign_requesters() {
-            const verbs = Object.keys(operations || {});
+            const verbs = Object.keys(op_tree);
             for (const verb of verbs) {
                 !api[verb] && throw_invalid_verb_error(verb);
                 this_datasource[verb] = create_requester({
                     api,
                     verb,
                     namespace,
-                    op_dict: operations[verb],
+                    op_dict: op_tree[verb],
                     item_preparer: real_item_preparer,
                     query_result_preparer: result_preparer,
                     }); // eslint-disable-line indent
@@ -50,35 +52,42 @@
 
     function create_requester(params) {
         const { api, verb, namespace, op_dict } = params;
-        return function make_request(arg0, op, payload) {
-            const promise = new Promise;
-            if (op_dict[op]) {
+        return function make_request(raw_arg0, raw_op, raw_op_params) {
+            const [ arg0, op, op_params ]
+                = validate_op_args(raw_arg0, raw_op, raw_op_params)
+                ; // eslint-disable-line indent
+            return op_dict[op] || ('fetch' === verb && undefined === op)
+                ? new Promise(_make_request)
+                : NOOP
+                ; // eslint-disable-line indent
+
+            // -----------
+
+            function _make_request(resolve_promise) {
                 const url_params = build_request_params({
                     namespace,
                     arg0,
                     op,
-                    payload,
+                    payload: op_params,
                     }); // eslint-disable-line indent
                 api[verb](url_params).then(process_response);
-                return promise;
-            }
-            return COLLECTION_UTIL.NOOP;
 
-            // -----------
+                // -----------
 
-            function process_response(raw_response) {
-                const { item_preparer, query_result_preparer } = params;
-                const raw_data = raw_response.data;
-                if (Array.isArray(raw_data)) {
-                    return promise.resolve(raw_data.map(item_preparer));
-                } else if (raw_data instanceof Query_result) {
-                    const query_result = new Query_result(raw_data);
-                    query_result.items = raw_data.items
-                        .map(query_result_preparer)
-                        ; // eslint-disable-line indent
-                    return promise.resolve(query_result);
+                function process_response(raw_response) {
+                    const { item_preparer, query_result_preparer } = params;
+                    const raw_data = raw_response.data;
+                    if (Array.isArray(raw_data)) {
+                        return resolve_promise(raw_data.map(item_preparer));
+                    } else if (raw_data instanceof Query_result) {
+                        const query_result = new Query_result(raw_data);
+                        query_result.items = raw_data.items
+                            .map(query_result_preparer)
+                            ; // eslint-disable-line indent
+                        return resolve_promise(query_result);
+                    }
+                    return resolve_promise(item_preparer(raw_data));
                 }
-                return promise.resolve(item_preparer(raw_data));
             }
         };
     }
@@ -90,9 +99,7 @@
             request_params.namespace = namespace;
         }
         switch (true) {
-            case undefined === arg0:
-                return request_params;
-            case COLLECTION_UTIL.ALL_ITEMS === arg0:
+            case ALL_ITEMS === arg0:
                 break;
             case arg0 instanceof Query:
                 request_params.query = String(arg0.query_string);
@@ -102,11 +109,7 @@
                 request_params.id = arg0;
                 break;
             default:
-                throw new TypeError([
-                    'When calling a bullpen operation, arg 0 must be one of:',
-                    'a string, a number, BULLPEN.Collection.ALL_ITEMS,',
-                    'or an instance of BULLPEN.Collection.Query',
-                    ].join(' ')); // eslint-disable-line indent
+                // Shouldn't happen because of validate_op_args
         }
         if ('string' === typeof op) {
             request_params.operation = op;
