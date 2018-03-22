@@ -25,7 +25,7 @@
             ; // eslint-disable-line indent
         const params = {};
         params.query_id = query_id;
-        params.query_string = Uri_query(query_string);
+        params.query_string = new Uri_query(query_string);
         return params;
     }
 
