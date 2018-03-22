@@ -15,7 +15,6 @@
         port: null,
         path_prefix: null,
         query: {},
-
         // Abstract methods
         fetch: () => throw_error('Children of Ajax_api must define fetch()'),
         }); // eslint-disable-line

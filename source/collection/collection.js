@@ -7,28 +7,32 @@
     }
     const { ALL_ITEMS, NOOP, validate_op_args } = COLLECTION_UTIL;
     // Static members
-    Object.assign(Collection, {
-        ALL_ITEMS,
-        NOOP,
-        Datasource,
-        Store,
-        Query,
-        Query_result,
+    Object.defineProperties(Collection, {
+        // Final
+        ALL_ITEMS: { value: ALL_ITEMS, enumerable: true },
+        NOOP: { value: NOOP, enumerable: true },
+        // Overridable by subclass
+        Datasource: { value: Datasource, writable: true, enumerable: true },
+        Store: { value: Store, writable: true, enumerable: true },
+        Query: { value: Query, writable: true, enumerable: true },
+        Query_result: { value: Query_result, writable: true, enumerable: true },
         }); // eslint-disable-line indent
-    return module.exports = Object.freeze(Collection);
+    return module.exports = Object.seal(Collection);
 
     // -----------
 
     function construct_collection(raw_params) {
         const this_collection = this;
-        const { datasource, store } = validate_params(raw_params);
+        const { datasource, store }
+            = validate_params(this_collection, raw_params)
+            ; // eslint-disable-line indent
         this_collection.get = create_getter(datasource, store);
         this_collection.stream = create_streamer(datasource, store);
         this_collection.mutate = create_mutator(datasource, store);
         return this_collection;
     }
 
-    function validate_params(raw_params) {
+    function validate_params(this_collection, raw_params) {
         const params = {};
         !(raw_params.datasource instanceof Datasource)
             && throw_error([
@@ -39,10 +43,10 @@
         params.datasource = raw_params.datasource;
         /* eslint-disable indent */
         params.store
-            = undefined === raw_params.store ? new Store
-            : !(raw_params.store instanceof Store) ? throw_error(
-                'store must be an instance of BULLPEN.Collection.Store',
-                )
+            = undefined === raw_params.store
+                ? new this_collection.constructor.Store
+            : !(raw_params.store instanceof Store)
+                ? throw_error('store must be an instance of Collection.Store')
             : raw_params.store
             ;
         /* eslint-enable indent */

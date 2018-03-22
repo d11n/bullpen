@@ -112,10 +112,12 @@
     // -----------
 
     function perform_default_fetch(store_struct, arg0, datasource_payload) {
+        /* eslint-disable indent */
         return arg0 instanceof Query ? fetch_query()
             : ALL_ITEMS === arg0 ? fetch_all()
             : fetch_one()
-            ; // eslint-disable-line indent
+            ;
+        /* eslint-enable indent */
 
         // -----------
 
