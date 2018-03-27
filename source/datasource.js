@@ -138,8 +138,8 @@
         throw new Error(`BULLPEN.Collection.Datasource: ${ message }`);
     }
 }(
-    require('../api'),
-    require('./query'),
-    require('./query-result'),
-    require('./util'),
+    require('./api'),
+    require('./collection/query'),
+    require('./collection/query-result'),
+    require('./collection/util'),
 ));

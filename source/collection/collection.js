@@ -1,19 +1,23 @@
 // eslint-disable-next-line max-params
-(function main(Datasource, Store, Query, Query_result, COLLECTION_UTIL) {
-    class Collection {
+(function main(Bullpen, Datasource, Store, Op, Query, Query_result, UTIL) {
+    const { ALL_ITEMS, NOOP } = UTIL;
+    class Collection extends Bullpen {
         constructor(...args) {
-            return construct_collection.call(this, ...args);
+            return super() && construct_collection.call(this, ...args);
         }
     }
-    const { ALL_ITEMS, NOOP, validate_op_args } = COLLECTION_UTIL;
+    // Functional instance members
+    Object.assign(Collection.prototype, {
+        perform_operation,
+        }); // eslint-disable-line indent
     // Static members
     Object.defineProperties(Collection, {
         // Final
         ALL_ITEMS: { value: ALL_ITEMS, enumerable: true },
         NOOP: { value: NOOP, enumerable: true },
         // Overridable by subclass
-        Datasource: { value: Datasource, writable: true, enumerable: true },
         Store: { value: Store, writable: true, enumerable: true },
+        Operation: { value: Op, writable: true, enumerable: true },
         Query: { value: Query, writable: true, enumerable: true },
         Query_result: { value: Query_result, writable: true, enumerable: true },
         }); // eslint-disable-line indent
@@ -26,9 +30,10 @@
         const { datasource, store }
             = validate_params(this_collection, raw_params)
             ; // eslint-disable-line indent
-        this_collection.get = create_getter(datasource, store);
-        this_collection.stream = create_streamer(datasource, store);
-        this_collection.mutate = create_mutator(datasource, store);
+        const creator_args = [ this_collection, datasource, store ];
+        this_collection.get = create_getter(...creator_args);
+        this_collection.stream = create_streamer(...creator_args);
+        this_collection.mutate = create_mutator(...creator_args);
         return this_collection;
     }
 
@@ -71,96 +76,104 @@
     /// To prevent the first user to save from replacig the form contents of the
     /// other user (causing them to lose their work), the contents of the form
     /// should be retrieved use `get()`, instead of `stream()`.
-    function create_getter(datasource, store) {
-        const verb = 'fetch';
-        return function get_from_collection(raw_arg0, raw_op, raw_op_params) {
-            const [ arg0, op, op_params ]
-                = validate_op_args(raw_arg0, raw_op, raw_op_params)
-                ; // eslint-disable-line indent
-            const params = { datasource, store, verb, arg0, op, op_params };
-            return do_op(params, (value) => JSON.parse(JSON.stringify(value)));
-            // Maybe do something better than this ^^^
+    function create_getter(this_collection, datasource, store) {
+        const static_op_params = Object.assign({ datasource, store }, {
+            bullpen_verb: 'get',
+            datasource_verb: 'fetch',
+            store_verb: 'fetch',
+            }); // eslint-disable-line
+        return function get_from_collection(arg, op, op_params) {
+            return this_collection.perform_operation(
+                new Op({ ...static_op_params, arg, op, op_params }),
+                ); // eslint-disable-line indent
         };
     }
 
-    function create_streamer(datasource, store) {
-        const verb = 'fetch';
-        return function get_from_collection(raw_arg0, raw_op, raw_op_params) {
-            const [ arg0, op, op_params ]
-                = validate_op_args(raw_arg0, raw_op, raw_op_params)
-                ; // eslint-disable-line indent
-            const params = { datasource, store, verb, arg0, op, op_params };
-            return do_op(params);
+    function create_streamer(this_collection, datasource, store) {
+        const static_op_params = Object.assign({ datasource, store }, {
+            bullpen_verb: 'stream',
+            datasource_verb: 'fetch',
+            store_verb: 'fetch',
+            }); // eslint-disable-line
+        return function get_from_collection(arg, op, op_params) {
+            return this_collection.perform_operation(
+                new Op({ ...static_op_params, arg, op, op_params }),
+                ); // eslint-disable-line indent
         };
     }
 
-    function create_mutator(datasource, store) {
-        const verb = 'mutate';
-        return function mutate_collection(raw_arg0, raw_op, raw_op_params) {
-            const [ arg0, op, op_params ]
-                = validate_op_args(raw_arg0, raw_op, raw_op_params)
-                ; // eslint-disable-line indent
+    function create_mutator(this_collection, datasource, store) {
+        const static_op_params = Object.assign({ datasource, store }, {
+            bullpen_verb: 'mutate',
+            datasource_verb: 'mutate', // will be http verb for rest apis
+            store_verb: 'mutate',
+            }); // eslint-disable-line
+        return function mutate_collection(arg, op, op_params) {
             if ('string' !== typeof op) {
                 throw new TypeError([
                     'When calling a bullpen mutation operation,',
                     'arg 1 must be the name of the operation to perform',
                     ].join(' ')); // eslint-disable-line indent
             }
-            const params = { datasource, store, verb, arg0, op, op_params };
-            return do_op(params, () => undefined);
+            this_collection.perform_operation(
+                new Op({ ...static_op_params, arg, op, op_params }),
+                ); // eslint-disable-line indent
+            return undefined;
+            // ^ Never return data on mutate
+            //   Fetch after mutation via subscription or promise
         };
     }
 
     // -----------
 
-    function do_op(params, alterer) {
-        const { datasource, store, verb, arg0, op, op_params } = params;
-        return new Promise(_do_op);
+    function perform_operation(op) {
+        return new Promise(_perform_operation);
 
         // -----------
 
-        function _do_op(resolve_promise) {
-            let datasource_result;
-            if ((arg0 === Collection.ALL_ITEMS && store.is_hydrated)
-                || (arg0 !== Collection.ALL_ITEMS
-                    && !(arg0 instanceof Collection.Query)
-                    && store.has(arg0)
-                    ) // eslint-disable-line indent
-                ) { // eslint-disable-line indent
-                do_store_op(op_params);
-            } else {
-                datasource_result = datasource[verb](arg0, op, op_params);
-                if (NOOP === datasource_result) {
-                    do_store_op(op_params);
-                } else if (datasource_result instanceof Promise) {
-                    datasource_result.then((response) => do_store_op(response));
-                } else {
-                    throw_datasource_return_error(verb);
-                }
+        function _perform_operation(resolve_promise) {
+            debugger;
+            const initial_store_result = op.execute_on_store();
+            if (![ undefined, NOOP ].includes(initial_store_result)) {
+                return resolve_promise(prepare_result(initial_store_result));
             }
+            const datasource_result = op.execute_on_datasource(op.params);
+            if (NOOP === datasource_result) {
+                const store_result = op.execute_on_store(op.params);
+                NOOP === store_result && throw_noop_error(op.verb, op.name);
+                return resolve_promise(prepare_result(store_result));
+            }
+            return datasource_result instanceof Promise
+                ? datasource_result.then(process_datasource_result)
+                : throw_datasource_return_error(op.verb)
+                ; // eslint-disable-line indent
 
             // -----------
 
-            function do_store_op(input) {
-                const store_result = store[verb](arg0, op, input);
-                const output = NOOP === store_result
-                    ? NOOP === datasource_result
-                        ? throw_invalid_fetch_op_error(op)
-                        : input
+            function process_datasource_result(raw_result) {
+                const store_result = op.execute_on_store(raw_result);
+                const result = NOOP === store_result
+                    ? raw_result
                     : store_result
-                    ; // eslint-disable-line indent
-                return resolve_promise(alterer ? alterer(output) : output);
+                    ;
+                return resolve_promise(prepare_result(result));
+            }
+
+            function prepare_result(result) {
+                /* eslint-disable indent */
+                return 'get' === op.verb ? JSON.parse(JSON.stringify(result))
+                    : 'mutate' === op.verb ? undefined
+                    : result
+                    ;
+                /* eslint-enable indent */
             }
         }
     }
 
     // -----------
 
-    function throw_invalid_fetch_op_error(op) {
-        throw_error([
-            `operations.fetch.${ op }`,
-            'is not defined in either the datasource or the store',
-            ].join(' ')); // eslint-disable-line indent
+    function throw_noop_error(verb, op) {
+        throw_error(`${ verb }('${ op }') is a noop`);
     }
 
     function throw_datasource_return_error(verb) {
@@ -173,8 +186,10 @@
         throw new Error(`BULLPEN.Collection: ${ message }`);
     }
 }(
-    require('./datasource'),
+    require('../bullpen'),
+    require('../datasource'),
     require('./store'),
+    require('./operation'),
     require('./query'),
     require('./query-result'),
     require('./util'),

@@ -1,20 +1,22 @@
 Before 1.0
 ----------
+- genericize operation class
+- genericize store class
+- overridable hydrate method on stores
 - tree bullpen
 - view bullpen
 - publishers (e.g. pusher)
-- make operations hit api instead of store until a publisher is added
-- make datasource defintion better support classic rest
-- think thru stores that have multiple datasources
+- make operations hit api and ignore store until a publisher is added
+- make datasource defintion support classic rest
 - code coverage
-- tests
-- documentation
-- get it up-to-snuff
+- plug it up
     - travis
-    - coveralls
     - codacy
     - code climate
     - snyk
     - david
-- get all a's ^
-- live on sr,tf,1mo
+- tests
+- documentation
+- get all a's on codacy/code climate
+- in production on sr,tf,1mo
+- think thru stores that have multiple datasources, maybe implement

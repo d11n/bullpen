@@ -1,17 +1,20 @@
 // eslint-disable-next-line max-params
-(function main(API, Collection) {
-    const { Fxm_api, Rest_api } = API;
+(function main(API, Datasource, Collection) {
+    const { Ajax_api, Fxm_api, Rest_api } = API;
     console.warn([
         '☠️  BULLPEN is under active development and will change often ☠️',
         '\nNot until it reaches version 0.1.0',
         'will its interface be relatively stable.',
         ].join(' ')); // eslint-disable-line indent
     return module.exports = Object.freeze({
+        Ajax_api,
         Fxm_api,
         Rest_api,
+        Datasource,
         Collection,
         }); // eslint-disable-line indent
 }(
     require('./api'),
+    require('./datasource'),
     require('./collection'),
 ));
