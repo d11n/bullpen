@@ -16,20 +16,19 @@
         return this_result;
     }
 
-    function validate_constructor_params(raw_params = {}) {
+    function validate_constructor_params(raw_params) {
         const params = {};
         raw_params.items
             && !Array.isArray(raw_params.items)
             && throw_error('items must be an array')
             ; // eslint-disable-line indent
-        params.items = raw_params.items || [];
-
         raw_params.refresh_url
             && 'string' !== typeof raw_params.refresh_url
             && throw_error('refresh_url must be a string')
             ; // eslint-disable-line indent
+        params.query_string = String(raw_params.query_string);
+        params.items = raw_params.items || [];
         params.refresh_url = raw_params.refresh_url || null;
-
         params.ids = raw_params.ids || params.items.map(get_id);
         return { ...raw_params, ...params };
     }

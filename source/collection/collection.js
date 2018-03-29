@@ -95,7 +95,7 @@
             datasource_verb: 'fetch',
             store_verb: 'fetch',
             }); // eslint-disable-line
-        return function get_from_collection(arg, op, op_params) {
+        return function stream_from_collection(arg, op, op_params) {
             return this_collection.perform_operation(
                 new Op({ ...static_op_params, arg, op, op_params }),
                 ); // eslint-disable-line indent
