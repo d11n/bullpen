@@ -16,7 +16,7 @@
         return this_result;
     }
 
-    function validate_constructor_params(raw_params) {
+    function validate_constructor_params(raw_params = {}) {
         const params = {};
         raw_params.items
             && !Array.isArray(raw_params.items)

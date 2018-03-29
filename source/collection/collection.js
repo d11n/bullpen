@@ -42,7 +42,7 @@
         !(raw_params.datasource instanceof Datasource)
             && throw_error([
                 'datasource must be',
-                'an instance of BULLPEN.Collection.Datasource',
+                'an instance of BULLPEN.Datasource',
                 ].join(' ')) // eslint-disable-line indent
             ; // eslint-disable-line indent
         params.datasource = raw_params.datasource;

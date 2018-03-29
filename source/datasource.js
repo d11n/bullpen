@@ -135,7 +135,7 @@
     // -----------
 
     function throw_error(message) {
-        throw new Error(`BULLPEN.Collection.Datasource: ${ message }`);
+        throw new Error(`BULLPEN.Datasource: ${ message }`);
     }
 }(
     require('./api'),
