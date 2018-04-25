@@ -21,7 +21,6 @@
         const this_store = this;
         const params = validate_params(raw_params);
         const { operations, default_fetch } = params;
-        // debugger;
         const store_struct = this_store.initialize_store_struct(this_store);
         Object.seal(store_struct);
         const fetch_dict = operations ? { ...operations.fetch } : {};
@@ -127,7 +126,6 @@
         // -----------
 
         function fetch_query() {
-            debugger;
             const key = arg.query_id;
             let value = store_struct.query_result_map.get(key);
             if (endpoint_payload) {
@@ -144,7 +142,6 @@
         }
 
         function fetch_all() {
-            debugger;
             if (!endpoint_payload && !store_struct.is_item_map_hydrated) {
                 return undefined;
             } else if (endpoint_payload) {
@@ -163,7 +160,6 @@
         }
 
         function fetch_one() {
-            debugger;
             let item = endpoint_payload;
             if (item) {
                 if (arg !== item.id) {

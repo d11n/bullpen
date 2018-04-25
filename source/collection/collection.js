@@ -132,7 +132,6 @@
         // -----------
 
         function _perform_operation(resolve_promise) {
-            debugger;
             const initial_store_result = op.execute_on_store();
             if (![ undefined, NOOP ].includes(initial_store_result)) {
                 return resolve_promise(prepare_result(initial_store_result));
