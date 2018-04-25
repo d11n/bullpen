@@ -116,7 +116,7 @@
 
     // -----------
 
-    function perform_default_fetch(store_struct, arg, datasource_payload) {
+    function perform_default_fetch(store_struct, arg, endpoint_payload) {
         /* eslint-disable indent */
         return arg instanceof Query ? fetch_query()
             : ALL_ITEMS === arg ? fetch_all()
@@ -130,10 +130,10 @@
             debugger;
             const key = arg.query_id;
             let value = store_struct.query_result_map.get(key);
-            if (datasource_payload) {
+            if (endpoint_payload) {
                 value = {
                     query: String(arg.query_string),
-                    result: JSON.parse(JSON.stringify(datasource_payload)),
+                    result: JSON.parse(JSON.stringify(endpoint_payload)),
                     }; // eslint-disable-line indent
                 store_struct.query_result_map.set(key, value);
             }
@@ -145,16 +145,16 @@
 
         function fetch_all() {
             debugger;
-            if (!datasource_payload && !store_struct.is_item_map_hydrated) {
+            if (!endpoint_payload && !store_struct.is_item_map_hydrated) {
                 return undefined;
-            } else if (datasource_payload) {
-                !Array.isArray(datasource_payload)
+            } else if (endpoint_payload) {
+                !Array.isArray(endpoint_payload)
                     && throw_error(
-                        'datasource attempted to hydrate store with non-array',
+                        'web service attempted to hydrate store with non-array',
                         ) // eslint-disable-line indent
                     ; // eslint-disable-line indent
                 store_struct.item_map.clear();
-                for (const item of datasource_payload) {
+                for (const item of endpoint_payload) {
                     store_struct.item_map.set(item.id, item);
                 }
                 store_struct.is_item_map_hydrated = true;
@@ -164,10 +164,13 @@
 
         function fetch_one() {
             debugger;
-            let item = datasource_payload;
+            let item = endpoint_payload;
             if (item) {
                 if (arg !== item.id) {
-                    throw_error('id does not match id fetched from datasource');
+                    throw_error([
+                        'id does not match',
+                        'id fetched from web service',
+                        ].join(' ')); // eslint-disable-line indent
                 }
                 store_struct.item_map.set(item.id, item);
             } else {

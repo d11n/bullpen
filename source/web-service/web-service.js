@@ -1,12 +1,12 @@
 // eslint-disable-next-line max-params
-(function main(axios, Uri_query, Api, API_UTIL) {
-    class Ajax_api extends Api {
+(function main(axios, Uri_query, Endpoint, WEB_SERVICE_UTIL) {
+    class Web_service {
         constructor(...args) {
-            return super() && construct_ajax_api.call(this, ...args);
+            return construct_web_service.call(this, ...args);
         }
     }
     // Instance members
-    Object.assign(Ajax_api.prototype, {
+    Object.assign(Web_service.prototype, {
         // Default params
         headers: {},
         http_verb: 'GET',
@@ -15,19 +15,21 @@
         port: null,
         path_prefix: null,
         query: {},
-        // Abstract methods
-        fetch: () => throw_error('Children of Ajax_api must define fetch()'),
+        // Abstract instance methods
+        fetch: () => throw_error('Children of Web_service must define fetch()'),
+        // Instance methods
+        get_endpoint,
         }); // eslint-disable-line
     // Static members
-    Object.assign(Ajax_api, { compose_url, make_request });
-    return module.exports = Object.freeze(Ajax_api);
+    Object.assign(Web_service, { Endpoint, compose_url, make_request });
+    return module.exports = Object.freeze(Web_service);
 
     // -----------
 
-    function construct_ajax_api(params) {
-        const this_api = this;
-        Object.assign(this_api, validate_constructor_params(params));
-        return this_api;
+    function construct_web_service(params) {
+        const this_web_service = this;
+        Object.assign(this_web_service, validate_constructor_params(params));
+        return this_web_service;
     }
 
     function validate_constructor_params(raw_params) {
@@ -92,11 +94,16 @@
         const path_segments = [ path_prefix, namespace, id, operation ];
         for (let i = 0, n = path_segments.length - 1; i <= n; i++) {
             if (path_segments[i]) {
-                url += `/${ API_UTIL.trim_slashes(path_segments[i]) }`;
+                url += `/${ WEB_SERVICE_UTIL.trim_slashes(path_segments[i]) }`;
             }
         }
         const url_query = new Uri_query(query);
         return `${ url || '/' }${ url_query }`;
+    }
+
+    function get_endpoint(params) {
+        const this_web_service = this;
+        return new Endpoint({ ...params, web_service: this_web_service });
     }
 
     // -----------
@@ -104,12 +111,12 @@
     function throw_error(message) {
         throw message instanceof Error
             ? message
-            : new Error(`BULLPEN.Ajax_api: ${ message }`)
+            : new Error(`BULLPEN.Web_service: ${ message }`)
             ; // eslint-disable-line indent
     }
 }(
     require('axios'),
     require('uri-query'),
-    require('./api'),
+    require('./endpoint'),
     require('./util'),
 ));

@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-params
-(function main(Bullpen, Datasource, Store, Op, Query, Query_result, UTIL) {
+(function main(Bullpen, WEB_SERVICE, Store, Op, Query, Query_result, UTIL) {
     const { ALL_ITEMS, NOOP } = UTIL;
     class Collection extends Bullpen {
         constructor(...args) {
@@ -27,10 +27,10 @@
 
     function construct_collection(raw_params) {
         const this_collection = this;
-        const { datasource, store }
+        const { endpoint, store }
             = validate_params(this_collection, raw_params)
             ; // eslint-disable-line indent
-        const creator_args = [ this_collection, datasource, store ];
+        const creator_args = [ this_collection, endpoint, store ];
         this_collection.get = create_getter(...creator_args);
         this_collection.stream = create_streamer(...creator_args);
         this_collection.mutate = create_mutator(...creator_args);
@@ -39,13 +39,13 @@
 
     function validate_params(this_collection, raw_params) {
         const params = {};
-        !(raw_params.datasource instanceof Datasource)
+        !(raw_params.endpoint instanceof WEB_SERVICE.Web_service.Endpoint)
             && throw_error([
-                'datasource must be',
-                'an instance of BULLPEN.Datasource',
+                'endpoint must be',
+                'an instance of BULLPEN.Web_service.Endpoint',
                 ].join(' ')) // eslint-disable-line indent
             ; // eslint-disable-line indent
-        params.datasource = raw_params.datasource;
+        params.endpoint = raw_params.endpoint;
         /* eslint-disable indent */
         params.store
             = undefined === raw_params.store
@@ -76,10 +76,10 @@
     /// To prevent the first user to save from replacig the form contents of the
     /// other user (causing them to lose their work), the contents of the form
     /// should be retrieved use `get()`, instead of `stream()`.
-    function create_getter(this_collection, datasource, store) {
-        const static_op_params = Object.assign({ datasource, store }, {
+    function create_getter(this_collection, endpoint, store) {
+        const static_op_params = Object.assign({ endpoint, store }, {
             bullpen_verb: 'get',
-            datasource_verb: 'fetch',
+            endpoint_verb: 'fetch',
             store_verb: 'fetch',
             }); // eslint-disable-line
         return function get_from_collection(arg, op, op_params) {
@@ -89,10 +89,10 @@
         };
     }
 
-    function create_streamer(this_collection, datasource, store) {
-        const static_op_params = Object.assign({ datasource, store }, {
+    function create_streamer(this_collection, endpoint, store) {
+        const static_op_params = Object.assign({ endpoint, store }, {
             bullpen_verb: 'stream',
-            datasource_verb: 'fetch',
+            endpoint_verb: 'fetch',
             store_verb: 'fetch',
             }); // eslint-disable-line
         return function stream_from_collection(arg, op, op_params) {
@@ -102,10 +102,10 @@
         };
     }
 
-    function create_mutator(this_collection, datasource, store) {
-        const static_op_params = Object.assign({ datasource, store }, {
+    function create_mutator(this_collection, endpoint, store) {
+        const static_op_params = Object.assign({ endpoint, store }, {
             bullpen_verb: 'mutate',
-            datasource_verb: 'mutate', // will be http verb for rest apis
+            endpoint_verb: 'mutate', // will be http verb for rest services
             store_verb: 'mutate',
             }); // eslint-disable-line
         return function mutate_collection(arg, op, op_params) {
@@ -137,20 +137,20 @@
             if (![ undefined, NOOP ].includes(initial_store_result)) {
                 return resolve_promise(prepare_result(initial_store_result));
             }
-            const datasource_result = op.execute_on_datasource(op.params);
-            if (NOOP === datasource_result) {
+            const endpoint_result = op.execute_on_endpoint(op.params);
+            if (NOOP === endpoint_result) {
                 const store_result = op.execute_on_store(op.params);
                 NOOP === store_result && throw_noop_error(op.verb, op.name);
                 return resolve_promise(prepare_result(store_result));
             }
-            return datasource_result instanceof Promise
-                ? datasource_result.then(process_datasource_result)
-                : throw_datasource_return_error(op.verb)
+            return endpoint_result instanceof Promise
+                ? endpoint_result.then(process_endpoint_result)
+                : throw_endpoint_return_error(op.verb)
                 ; // eslint-disable-line indent
 
             // -----------
 
-            function process_datasource_result(raw_result) {
+            function process_endpoint_result(raw_result) {
                 const store_result = op.execute_on_store(raw_result);
                 const result = NOOP === store_result
                     ? raw_result
@@ -176,9 +176,9 @@
         throw_error(`${ verb }('${ op }') is a noop`);
     }
 
-    function throw_datasource_return_error(verb) {
+    function throw_endpoint_return_error(verb) {
         throw_error(
-            `datasource.${ verb }() must return a Promise or Collection.NOOP`,
+            `endpoint.${ verb }() must return a Promise or Collection.NOOP`,
             ); // eslint-disable-line indent
     }
 
@@ -187,7 +187,7 @@
     }
 }(
     require('../bullpen'),
-    require('../datasource'),
+    require('../web-service'),
     require('./store'),
     require('./operation'),
     require('./query'),

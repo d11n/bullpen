@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-params
-(function main(Datasource, Store, Query, UTIL) {
+(function main(WEB_SERVICE, Store, Query, UTIL) {
+    const { Endpoint } = WEB_SERVICE.Web_service;
     const { ALL_ITEMS } = UTIL;
     class Operation {
         constructor(...args) {
@@ -17,12 +18,12 @@
             ? ALL_ITEMS
             : raw_params.arg
             ;
-        const data_func = raw_params.datasource[raw_params.datasource_verb];
+        const data_func = raw_params.endpoint[raw_params.endpoint_verb];
         const store_func = raw_params.store[raw_params.store_verb];
         Object.assign(this_op, {
             is_for_all_items: ALL_ITEMS === raw_arg,
             is_for_query_result: raw_arg instanceof Query,
-            execute_on_datasource,
+            execute_on_endpoint,
             execute_on_store,
             }); // eslint-disable-line indent
         this_op.is_for_one_item = !this_op.is_for_all_items
@@ -37,7 +38,7 @@
 
         // -----------
 
-        function execute_on_datasource(data) {
+        function execute_on_endpoint(data) {
             return data_func(raw_arg, this_op.op, data);
         }
 
@@ -57,9 +58,9 @@
         // -----------
 
         function enforce_conduct() {
-            enforce_required_object('datasource', Datasource, 'Datasource');
+            enforce_required_object('endpoint', Endpoint, 'Endpoint');
             enforce_required_object('store', Store, 'Store');
-            const verb_list = [ 'bullpen', 'datasource', 'store' ];
+            const verb_list = [ 'bullpen', 'endpoint', 'store' ];
             for (const verb of verb_list) {
                 enforce_required_string(`${ verb }_verb`);
             }
@@ -75,10 +76,10 @@
                     `not '${ raw_params.store_verb }'`,
                     ].join(' ')) // eslint-disable-line indent
                 ; // eslint-disable-line indent
-            const { datasource, datasource_verb } = raw_params;
-            'function' !== typeof datasource[datasource_verb]
+            const { endpoint, endpoint_verb } = raw_params;
+            'function' !== typeof endpoint[endpoint_verb]
                 && throw_error(
-                    'datasource_verb must be method on the datasource',
+                    'endpoint_verb must be method on the endpoint',
                     ) // eslint-disable-line indent
                 ; // eslint-disable-line indent
             const { arg, op, op_params } = raw_params;
@@ -134,7 +135,7 @@
         throw new Error(`BULLPEN.Collection.Operation: ${ message }`);
     }
 }(
-    require('../datasource'),
+    require('../web-service'),
     require('./store'),
     require('./query'),
     require('./util'),

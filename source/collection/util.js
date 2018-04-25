@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-params
 (function main(Query) {
-    const ALL_ITEMS = new String(''); // eslint-disable-line no-new-wrappers
-    const NOOP = new String(''); // eslint-disable-line no-new-wrappers
+    const ALL_ITEMS = new String('*'); // eslint-disable-line no-new-wrappers
+    const NOOP = new String('NOOP'); // eslint-disable-line no-new-wrappers
     return module.exports = Object.freeze({
         ALL_ITEMS,
         NOOP,

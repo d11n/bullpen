@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-params
-(function main(Ajax_api, API_UTIL) {
-    class Rest_api extends Ajax_api {
+(function main(Web_service, WEB_SERVICE_UTIL) {
+    class Rest_service extends Web_service {
         constructor(...args) {
             return super(...args);
         }
@@ -25,17 +25,17 @@
             return make_request.call(this, params, 'POST');
         }
     }
-    return module.exports = Object.freeze(Rest_api);
+    return module.exports = Object.freeze(Rest_service);
 
     // -----------
 
     function make_request(params, http_verb) {
-        return API_UTIL.make_request_from_instance.call(
+        return WEB_SERVICE_UTIL.make_request_from_instance.call(
             this,
             Object.assign({}, params, { http_verb }),
             ); // eslint-disable-line indent
     }
 }(
-    require('./ajax'),
+    require('./web-service'),
     require('./util'),
 ));

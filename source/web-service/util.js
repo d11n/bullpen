@@ -9,24 +9,24 @@
     // -----------
 
     function make_request_from_instance(params) {
-        const this_datasource = this;
-        const { preparer } = this_datasource;
+        const this_endpoint = this;
+        const { preparer } = this_endpoint;
         const headers = Object.assign(
             {},
-            this_datasource.headers,
+            this_endpoint.headers,
             params.headers,
             ); // eslint-disable-line indent
-        return this_datasource.constructor.make_request(
+        return this_endpoint.constructor.make_request(
             Object.assign({}, params, { headers, preparer }),
-            compose_url_from_instance.bind(this_datasource),
+            compose_url_from_instance.bind(this_endpoint),
             ); // eslint-disable-line indent
     }
 
     function compose_url_from_instance(params) {
-        const this_datasource = this;
-        const { protocol, domain, port, path_prefix } = this_datasource;
+        const this_endpoint = this;
+        const { protocol, domain, port, path_prefix } = this_endpoint;
         const instance_params = { protocol, domain, port, path_prefix };
-        return this_datasource.constructor.compose_url(
+        return this_endpoint.constructor.compose_url(
             Object.assign({}, instance_params, params),
             ); // eslint-disable-line indent
     }

@@ -1,34 +1,34 @@
 // eslint-disable-next-line max-params
-(function main(API, Query, Query_result, COLLECTION_UTIL) {
-    class Datasource {
+(function main(Web_service, Query, Query_result, COLLECTION_UTIL) {
+    class Endpoint {
         constructor(...args) {
-            return construct_datasource.call(this, ...args);
+            return construct_endpoint.call(this, ...args);
         }
     }
     const { ALL_ITEMS, NOOP, validate_op_args } = COLLECTION_UTIL;
-    return module.exports = Datasource;
+    return module.exports = Endpoint;
 
     // -----------
 
-    function construct_datasource(raw_params) {
-        const this_datasource = this;
+    function construct_endpoint(raw_params) {
+        const this_endpoint = this;
         const params = validate_params(raw_params);
-        const { api, namespace, operations } = params;
+        const { web_service, namespace, operations } = params;
         const op_tree = Object.assign({ fetch: {} }, operations);
         const { preparer, item_preparer, query_result_preparer } = params;
         const real_item_preparer = item_preparer || preparer || noprep;
         const result_preparer = query_result_preparer || preparer || noprep;
         assign_requesters();
-        return this_datasource;
+        return this_endpoint;
 
         // -----------
 
         function assign_requesters() {
             const verbs = Object.keys(op_tree);
             for (const verb of verbs) {
-                !api[verb] && throw_invalid_verb_error(verb);
-                this_datasource[verb] = create_requester({
-                    api,
+                !web_service[verb] && throw_invalid_verb_error(verb);
+                this_endpoint[verb] = create_requester({
+                    web_service,
                     verb,
                     namespace,
                     op_dict: op_tree[verb],
@@ -40,10 +40,18 @@
     }
 
     function validate_params(raw_params) {
-        !raw_params.api
-            ? throw_error('api is required')
-            : !(raw_params.api instanceof API.Api)
-                && throw_error('api must be an instance of BULLPEN.Api')
+        // handle circular dependency
+        const Web_service_class = 'function' === typeof Web_service
+            ? Web_service
+            : require('./web-service')
+            ; // eslint-disable-line indent
+        !raw_params.web_service
+            ? throw_error('web_service is required')
+            : !(raw_params.web_service instanceof Web_service_class)
+                && throw_error([
+                    'web_service must be',
+                    'an instance of BULLPEN.Web_service',
+                    ].join(' ')) // eslint-disable-line indent
             ; // eslint-disable-line indent
         return raw_params;
     }
@@ -51,7 +59,7 @@
     // -----------
 
     function create_requester(params) {
-        const { api, verb, namespace, op_dict } = params;
+        const { web_service, verb, namespace, op_dict } = params;
         return function make_request(raw_arg0, raw_op, raw_op_params) {
             const [ arg0, op, op_params ]
                 = validate_op_args(raw_arg0, raw_op, raw_op_params)
@@ -70,7 +78,7 @@
                     op,
                     payload: op_params,
                     }); // eslint-disable-line indent
-                api[verb](url_params).then(process_response);
+                web_service[verb](url_params).then(process_response);
 
                 // -----------
 
@@ -124,7 +132,7 @@
 
     function throw_invalid_verb_error(verb) {
         throw new Error(
-            `${ verb } must be a method on the provided api`,
+            `${ verb } must be a method on the provided web_service`,
             ); // eslint-disable-line indent
     }
 
@@ -135,11 +143,11 @@
     // -----------
 
     function throw_error(message) {
-        throw new Error(`BULLPEN.Datasource: ${ message }`);
+        throw new Error(`BULLPEN.Web_service.Endpoint: ${ message }`);
     }
 }(
-    require('./api'),
-    require('./collection/query'),
-    require('./collection/query-result'),
-    require('./collection/util'),
+    require('./web-service'),
+    require('../collection/query'),
+    require('../collection/query-result'),
+    require('../collection/util'),
 ));

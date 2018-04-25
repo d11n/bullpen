@@ -1,13 +1,12 @@
 Before 1.0
 ----------
+- add push services (e.g. pusher)
 - genericize operation class
 - genericize store class
 - overridable hydrate method on stores
-- tree bullpen
 - view bullpen
-- publishers (e.g. pusher)
-- make operations hit api and ignore store until a publisher is added
-- make datasource defintion support classic rest
+- make operations hit web service and ignore store until a push service is added
+- make endpoint defintion support classic rest
 - code coverage
 - plug it up
     - travis

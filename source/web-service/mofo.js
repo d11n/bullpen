@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-params
-(function main(Ajax_api, API_UTIL) {
-    // Fetch XOR Mutate
-    class Fxm_api extends Ajax_api {
+(function main(Web_service, WEB_SERVICE_UTIL) {
+    // Mutate or Fetch Operations
+    class Mofo_service extends Web_service {
         constructor(...args) {
             return super(...args);
         }
@@ -12,17 +12,17 @@
             return make_request.call(this, params, 'POST');
         }
     }
-    return module.exports = Object.freeze(Fxm_api);
+    return module.exports = Object.freeze(Mofo_service);
 
     // -----------
 
     function make_request(params, http_verb) {
-        return API_UTIL.make_request_from_instance.call(
+        return WEB_SERVICE_UTIL.make_request_from_instance.call(
             this,
             Object.assign({}, params, { http_verb }),
             ); // eslint-disable-line indent
     }
 }(
-    require('./ajax'),
+    require('./web-service'),
     require('./util'),
 ));
