@@ -39,11 +39,11 @@
         // -----------
 
         function execute_on_endpoint(data) {
-            return data_func(raw_arg, this_op.op, data);
+            return data_func(raw_arg, this_op.name, data);
         }
 
         function execute_on_store(data) {
-            return store_func(raw_arg, this_op.op, data);
+            return store_func(raw_arg, this_op.name, data);
         }
     }
 
