@@ -4,7 +4,6 @@ Before 1.0
 - genericize operation class
 - genericize store class
 - overridable hydrate method on stores
-- view bullpen
 - make operations hit web service and ignore store until a push service is added
 - make endpoint defintion support classic rest
 - code coverage

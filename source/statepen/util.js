@@ -8,21 +8,21 @@
 
     // -----------
 
-    function validate_op_args(op, op_params) {
+    function validate_op_args({ op_name, op_params }) {
         switch (true) {
-            case undefined === op:
-            case null === op:
-            case 'string' === typeof op:
+            case undefined === op_name:
+            case null === op_name:
+            case 'string' === typeof op_name:
                 if (op_params && 'object' !== typeof op_params) {
                     throw new Error([
-                        'When calling a bullpen operation for a view,',
+                        'When calling a Statepen operation,',
                         'if arg 1 is provided, it must be a params object',
                         ].join(' ')); // eslint-disable-line indent
                 }
-                return [ op, op_params ];
+                return [ op_name, op_params ];
         }
         throw new Error([
-            'When calling a bullpen operation for a view,',
+            'When calling a Statepen operation,',
             'if args are provided, arg 0 of must be a string',
             ].join(' ')); // eslint-disable-line indent
     }

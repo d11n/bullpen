@@ -19,7 +19,7 @@
         // -----------
 
         function execute_on_store(data) {
-            return store_func(op.name, data);
+            return store_func({ op_name: op.name, op_params: op.params, data });
         }
     }
 
@@ -54,13 +54,13 @@
             const { op, op_params } = raw_params;
             if (op && 'string' !== typeof op) {
                 throw new Error([
-                    'when calling a view bullpen operation,',
+                    'when calling a Statepen operation,',
                     'if arg 0 is provided, it must be',
                     'the name of the operation to perform',
                     ].join(' ')); // eslint-disable-line indent
             } else if (op_params && 'object' !== typeof op_params) {
                 throw new Error([
-                    'when calling a bullpen operation,',
+                    'when calling a Statepen operation,',
                     'if arg 1 is provided, it must be a params object',
                     ].join(' ')); // eslint-disable-line indent
             }
@@ -88,7 +88,7 @@
     // -----------
 
     function throw_error(message) {
-        throw new Error(`BULLPEN.View.Operation: ${ message }`);
+        throw new Error(`BULLPEN.Statepen.Operation: ${ message }`);
     }
 }(
     require('./store'),
