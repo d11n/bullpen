@@ -3,7 +3,7 @@
     const { NOOP } = UTIL;
     class Statepen extends Bullpen {
         constructor(...args) {
-            return super(...args) && construct_statepen.call(this, ...args);
+            return super(...args) && construct_statepen.apply(this, args);
         }
     }
     // Instance members
@@ -30,7 +30,7 @@
             'use stream() instead of get().',
             'Statepens must always stream their values',
             'because they can only contain local, non-persistent data',
-            ]); // eslint-disable-line indent
+        ]);
         statepen.stream = create_streamer(...creator_args);
         statepen.mutate = create_mutator(...creator_args);
         return statepen;
@@ -62,11 +62,11 @@
         const static_op_params = Object.assign({ store }, {
             bullpen_verb: 'stream',
             store_verb: 'fetch',
-            }); // eslint-disable-line
-        return function stream_from_statepen(op, op_params) {
+        });
+        return function stream_from_state(name, params) {
             return statepen.perform_operation(
-                new Op({ ...static_op_params, op, op_params }),
-                ); // eslint-disable-line indent
+                new Op({ ...static_op_params, name, params }),
+            );
         };
     }
 
@@ -74,17 +74,18 @@
         const static_op_params = Object.assign({ store }, {
             bullpen_verb: 'mutate',
             store_verb: 'mutate',
-            }); // eslint-disable-line
-        return function mutate_statepen(op, op_params) {
-            if ('string' !== typeof op) {
+        });
+        return function mutate_state(name, params) {
+            if ('string' !== typeof name) {
                 throw new TypeError([
                     'When calling a Statepen mutation operation,',
-                    'arg 0 must be the name of the operation to perform',
-                    ].join(' ')); // eslint-disable-line indent
+                    'arg 0 must be either the key to mutate,',
+                    'or the name of the operation to perform',
+                ]);
             }
             statepen.perform_operation(
-                new Op({ ...static_op_params, op, op_params }),
-                ); // eslint-disable-line indent
+                new Op({ ...static_op_params, name, params }),
+            );
             return undefined;
             // ^ Never return data on mutate
             //   Fetch after mutation via subscription or promise

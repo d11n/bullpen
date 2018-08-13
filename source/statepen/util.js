@@ -4,26 +4,26 @@
     return module.exports = Object.freeze({
         NOOP,
         validate_op_args,
-        }); // eslint-disable-line indent
+    });
 
     // -----------
 
-    function validate_op_args({ op_name, op_params }) {
+    function validate_op_args({ name, params }) {
         switch (true) {
-            case undefined === op_name:
-            case null === op_name:
-            case 'string' === typeof op_name:
-                if (op_params && 'object' !== typeof op_params) {
+            case undefined === name:
+            case null === name:
+            case 'string' === typeof name:
+                if (params && 'object' !== typeof params) {
                     throw new Error([
                         'When calling a Statepen operation,',
                         'if arg 1 is provided, it must be a params object',
-                        ].join(' ')); // eslint-disable-line indent
+                    ].join(' '));
                 }
-                return [ op_name, op_params ];
+                return { name, params };
         }
         throw new Error([
             'When calling a Statepen operation,',
             'if args are provided, arg 0 of must be a string',
-            ].join(' ')); // eslint-disable-line indent
+        ].join(' '));
     }
 }());

@@ -1,11 +1,23 @@
+Before 0.1
+----------
+- genericize operation class, maybe opmap class?
+    - make single NOOP as static prop
+    - replace op.execute_on_*() w/ *.execute(op)
+- genericize store class
+- figure out what to do with util/validate_op_args()
+- think thru ideal hydration workflow for each bullpen class
+- add push services and at least pusher
+- until a push service is added
+    - fetch ops always hit web service
+    - refetch after every mutation
+- bullpen-mobx, bullpen-mobx-peer
+
 Before 1.0
 ----------
-- add push services (e.g. pusher)
-- genericize operation class
-- genericize store class
-- overridable hydrate method on stores
-- make operations hit web service and ignore store until a push service is added
+- bullpen-redux, bullpen-redux-peer
+- figure out which methods should be abstract and defer to mobx/redux
 - make endpoint defintion support classic rest
+- refactor into composable npm packages?
 - code coverage
 - plug it up
     - travis
@@ -17,4 +29,6 @@ Before 1.0
 - documentation
 - get all a's on codacy/code climate
 - in production on sr,tf,1mo
+- user (developer) test ease of use
+- user (developer) test error messages
 - think thru stores that have multiple datasources, maybe implement

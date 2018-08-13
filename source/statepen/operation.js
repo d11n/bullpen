@@ -12,14 +12,14 @@
     function construct_operation(raw_params) {
         const op = this;
         Object.assign(op, validate_constructor_params(raw_params));
-        const store_func = raw_params.store[raw_params.store_verb];
+        const store_func = raw_params.store[ raw_params.store_verb ];
         Object.assign(op, { execute_on_store });
         return op;
 
         // -----------
 
-        function execute_on_store(data) {
-            return store_func({ op_name: op.name, op_params: op.params, data });
+        function execute_on_store() {
+            return store_func({ name: op.name, params: op.params });
         }
     }
 
@@ -27,8 +27,8 @@
         const params = {};
         enforce_conduct();
         params.verb = raw_params.bullpen_verb;
-        params.name = raw_params.op;
-        params.params = raw_params.op_params;
+        params.name = raw_params.name;
+        params.params = raw_params.params;
         return params;
 
         // -----------
@@ -51,18 +51,18 @@
                     `not '${ raw_params.store_verb }'`,
                     ].join(' ')) // eslint-disable-line indent
                 ; // eslint-disable-line indent
-            const { op, op_params } = raw_params;
-            if (op && 'string' !== typeof op) {
+            const { name, params: op_params } = raw_params;
+            if (name && 'string' !== typeof name) {
                 throw new Error([
                     'when calling a Statepen operation,',
                     'if arg 0 is provided, it must be',
                     'the name of the operation to perform',
-                    ].join(' ')); // eslint-disable-line indent
+                ]);
             } else if (op_params && 'object' !== typeof op_params) {
                 throw new Error([
                     'when calling a Statepen operation,',
                     'if arg 1 is provided, it must be a params object',
-                    ].join(' ')); // eslint-disable-line indent
+                ]);
             }
             return true;
         }

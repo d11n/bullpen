@@ -2,7 +2,7 @@
 (function main(UTIL) {
     class Store {
         constructor(...args) {
-            return construct_store.call(this, ...args);
+            return construct_store.apply(this, args);
         }
     }
     const { NOOP, validate_op_args } = UTIL;
@@ -20,11 +20,10 @@
 
     // -----------
 
-    function construct_store(raw_params) {
+    function construct_store(params) {
         const store = this;
-        const params = validate_params(raw_params);
-        const { initial_state, operations } = params;
-        const struct = store.initialize_struct({ store, initial_state });
+        const { state, operations } = validate_params(params);
+        const struct = store.initialize_struct({ store, state });
         Object.seal(struct);
 
         const fetch_dict = {};
@@ -50,7 +49,7 @@
 
         function add_ops_to_dicts() {
             fetch_dict[undefined] = store.perform_default_fetch;
-            for (const key of Object.keys(initial_state)) {
+            for (const key of Object.keys(state)) {
                 fetch_dict[key] = store.perform_key_fetch;
                 mutate_dict[key] = store.perform_key_mutation;
             }
@@ -59,7 +58,7 @@
                     if (fetch_dict[key]) {
                         throw_error([
                             'cannot name an operation the same thing',
-                            'as a key in initial_state',
+                            'as a key in state',
                         ]);
                     }
                     fetch_dict[key] = operations.fetch[key];
@@ -68,7 +67,7 @@
                     if (mutate_dict[key]) {
                         throw_error([
                             'cannot name an operation the same thing',
-                            'as a key in initial_state',
+                            'as a key in state',
                         ]);
                     }
                     mutate_dict[key] = operations.mutate[key];
@@ -82,10 +81,8 @@
         return { ...raw_params };
     }
 
-    function initialize_struct({ store, initial_state }) {
-        // Throw to force override?
-        const struct = Object.seal({ ...initial_state });
-        return struct;
+    function initialize_struct({ state }) {
+        return { ...state };
     }
 
     // -----------
@@ -93,14 +90,13 @@
     function create_method(params) {
         const { store, method, struct, op_dict } = params;
         return function perform_operation(perform_params) {
-            const [ op_name, op_params ] = validate_op_args(perform_params);
-            if (op_dict[op_name]) {
+            const op = validate_op_args(perform_params);
+            if (op_dict[op.name]) {
                 const store_class_method = store.constructor.prototype[method];
                 return store_class_method({
-                    perform_operation: op_dict[op_name],
+                    perform_operation: op_dict[op.name],
                     struct,
-                    op_name,
-                    op_params,
+                    op,
                 });
             }
             return NOOP;
@@ -108,13 +104,13 @@
     }
 
     function fetch_from_store(fetch_params) {
-        const { perform_operation, struct, op_name, op_params } = fetch_params;
-        return perform_operation({ struct, op_name, op_params });
+        const { perform_operation, struct, op } = fetch_params;
+        return perform_operation({ struct, op });
     }
 
     function mutate_store(mutate_params) {
-        const { perform_operation, struct, op_name, op_params } = mutate_params;
-        perform_operation({ struct, op_name, op_params });
+        const { perform_operation, struct, op } = mutate_params;
+        perform_operation({ struct, op });
         return undefined;
         // ^ Never return data on mutate.
         //   subscribe to Mobx/Redux stores to trigger fresh fetches.
@@ -126,13 +122,13 @@
         return struct;
     }
 
-    function perform_key_fetch({ struct, op_name }) {
-        return struct[op_name];
+    function perform_key_fetch({ struct, op }) {
+        return struct[op.name];
     }
 
-    function perform_key_mutation({ struct, op_name, op_params }) {
+    function perform_key_mutation({ struct, op }) {
         // Throw to force override?
-        Object.assign(struct[op_name], op_params);
+        Object.assign(struct[op.name], op.params);
         return struct;
     }
 
@@ -144,7 +140,7 @@
             ? raw_message.join(' ')
             : raw_message
             ;
-        throw new Error(`BULLPEN.Statepen: ${ message }`);
+        throw new Error(`BULLPEN.Statepen.Store: ${ message }`);
     }
 }(
     require('./util'),
