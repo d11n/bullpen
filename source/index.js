@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-params
-(function main(WEB_SERVICE, Collection, Statepen) {
+(function main(WEB_SERVICE, Collection, Statepen, Treepen) {
     const { Web_service, Mofo_service } = WEB_SERVICE;
     console.warn([
         '☠️  BULLPEN is under active development and will change often ☠️',
@@ -11,9 +11,11 @@
         Mofo_service,
         Collection,
         Statepen,
+        Treepen,
         }); // eslint-disable-line indent
 }(
     require('./web-service'),
     require('./collection'),
     require('./statepen'),
+    require('./treepen'),
 ));

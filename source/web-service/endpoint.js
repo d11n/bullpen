@@ -61,13 +61,18 @@
     function create_requester(params) {
         const { web_service, verb, namespace, op_dict } = params;
         return function make_request(raw_arg0, raw_op, raw_op_params) {
-            const [ arg0, op, op_params ]
+            let [ arg0, op, op_params ] // eslint-disable-line prefer-const
                 = validate_op_args(raw_arg0, raw_op, raw_op_params)
                 ; // eslint-disable-line indent
-            return op_dict[op] || ('fetch' === verb && undefined === op)
-                ? new Promise(_make_request)
-                : NOOP
-                ; // eslint-disable-line indent
+            switch (true) {
+                case !op_dict[op] && op_params.fallback_to_nameless: // temp hax
+                    op = undefined;
+                    // eslint-disable-next-line no-fallthrough
+                case op_dict[op]:
+                case 'fetch' === verb && undefined === op:
+                    return new Promise(_make_request);
+            }
+            return NOOP;
 
             // -----------
 
