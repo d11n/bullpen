@@ -53,7 +53,7 @@
                 fetch_dict[key] = store.perform_key_fetch;
                 mutate_dict[key] = store.perform_key_mutation;
             }
-            if (operations) {
+            if (operations && operations.fetch) {
                 for (const key of Object.keys(operations.fetch)) {
                     if (fetch_dict[key]) {
                         throw_error([
@@ -63,6 +63,8 @@
                     }
                     fetch_dict[key] = operations.fetch[key];
                 }
+            }
+            if (operations && operations.mutate) {
                 for (const key of Object.keys(operations.mutate)) {
                     if (mutate_dict[key]) {
                         throw_error([

@@ -11,6 +11,7 @@ Before 0.1
     - fetch ops always hit web service
     - refetch after every mutation
 - bullpen-mobx, bullpen-mobx-peer
+- throttle endpoint requests (mobx triggers way too many)
 
 Before 1.0
 ----------

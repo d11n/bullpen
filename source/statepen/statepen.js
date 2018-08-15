@@ -26,11 +26,7 @@
         const statepen = this;
         const { store } = validate_params(statepen, raw_params);
         const creator_args = [ statepen, store ];
-        statepen.get = () => throw_error([
-            'use stream() instead of get().',
-            'Statepens must always stream their values',
-            'because they can only contain local, non-persistent data',
-        ]);
+        statepen.get = create_getter(...creator_args);
         statepen.stream = create_streamer(...creator_args);
         statepen.mutate = create_mutator(...creator_args);
         return statepen;
@@ -57,6 +53,18 @@
     }
 
     // -----------
+
+    function create_getter(statepen, store) {
+        const static_op_params = Object.assign({ store }, {
+            bullpen_verb: 'get',
+            store_verb: 'fetch',
+        });
+        return function get_from_state(name, params) {
+            return statepen.perform_operation(
+                new Op({ ...static_op_params, name, params }),
+            );
+        };
+    }
 
     function create_streamer(statepen, store) {
         const static_op_params = Object.assign({ store }, {
@@ -95,7 +103,18 @@
     // -----------
 
     function perform_operation(op) {
-        return op.execute_on_store();
+        return prepare_result(op.execute_on_store());
+
+        // -----------
+
+        function prepare_result(result) {
+            /* eslint-disable indent */
+            return 'get' === op.verb ? JSON.parse(JSON.stringify(result))
+                : 'mutate' === op.verb ? undefined
+                : result
+                ;
+            /* eslint-enable indent */
+        }
     }
 
     // -----------

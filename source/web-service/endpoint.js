@@ -65,10 +65,12 @@
                 = validate_op_args(raw_arg0, raw_op, raw_op_params)
                 ; // eslint-disable-line indent
             switch (true) {
-                case !op_dict[op] && op_params.fallback_to_nameless: // temp hax
+                case !Object.prototype.hasOwnProperty.call(op_dict, op)
+                    && op_params.fallback_to_nameless
+                    : // temp hack
                     op = undefined;
                     // eslint-disable-next-line no-fallthrough
-                case op_dict[op]:
+                case Object.prototype.hasOwnProperty.call(op_dict, op):
                 case 'fetch' === verb && undefined === op:
                     return new Promise(_make_request);
             }
@@ -80,7 +82,7 @@
                 const url_params = build_request_params({
                     namespace,
                     arg0,
-                    op,
+                    op_path: op_dict[op],
                     payload: op_params,
                     }); // eslint-disable-line indent
                 web_service[verb](url_params).then(process_response);
@@ -106,7 +108,7 @@
     }
 
     function build_request_params(params) {
-        const { namespace, arg0, op, payload } = params;
+        const { namespace, arg0, op_path, payload } = params;
         const request_params = {};
         if (namespace && 'string' === typeof namespace) {
             request_params.namespace = namespace;
@@ -124,8 +126,8 @@
             default:
                 // Shouldn't happen because of validate_op_args
         }
-        if ('string' === typeof op) {
-            request_params.operation = op;
+        if ('string' === typeof op_path) {
+            request_params.operation = op_path;
             if ('object' === typeof payload) {
                 request_params.payload = payload;
             }
