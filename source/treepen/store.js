@@ -23,7 +23,6 @@
         const store = this;
         const { tree, operations } = validate_params(params);
         const struct = store.initialize_struct({ store, tree });
-        Object.seal(struct);
 
         const fetch_dict = operations ? { ...operations.fetch } : {};
         fetch_dict[undefined] = store.perform_default_fetch;

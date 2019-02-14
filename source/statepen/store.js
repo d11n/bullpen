@@ -24,7 +24,6 @@
         const store = this;
         const { state, operations } = validate_params(params);
         const struct = store.initialize_struct({ store, state });
-        Object.seal(struct);
 
         const fetch_dict = {};
         const mutate_dict = {};
